@@ -1,4 +1,4 @@
-import socket  # noqa: F401
+import socket
 
 
 def echo_endpoint(path: str):
