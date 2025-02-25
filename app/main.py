@@ -17,6 +17,7 @@ def user_agent_endpoint(request):
             if header_key.lower() == "user-agent":
                 value = splitted_header[1]
     response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(value)}\r\n\r\n{value}".encode()
+    return response
     
     
 
@@ -32,6 +33,7 @@ def main():
         elif path.startswith("/echo"):
             response = echo_endpoint(path)
         elif path.startswith("/user-agent"):
+            print("here bro")
             response = user_agent_endpoint(data)
         else:
             response = b"HTTP/1.1 404 Not Found\r\n\r\n"
