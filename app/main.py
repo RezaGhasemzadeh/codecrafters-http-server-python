@@ -1,9 +1,12 @@
 import socket  # noqa: F401
+import requests
 
 
 def echo_endpoint(path: str):
-    data = path.split("/")[-1]
-    return data
+    response_body = path.split("/")[-1]
+    response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(response_body)}\r\n\r\n{response_body}"
+    return response
+    
 
 def main():
 
@@ -16,8 +19,8 @@ def main():
         if path == "/":
             conn.sendall(b"HTTP/1.1 200 OK\r\n\r\n")
         elif path.startswith("/echo"):
-            result = echo_endpoint(path)
-            conn.sendall(result.encode())
+            server_response = echo_endpoint(path)
+            conn.sendall(server_response.encode())
         else:
             conn.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
 
