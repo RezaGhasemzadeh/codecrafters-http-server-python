@@ -14,7 +14,7 @@ def user_agent_endpoint(request):
         if h:
             splitted_header = h.split(":")
             header_key = h[0]
-            if header_key.lower() == "user-agent":
+            if header_key == "User-Agent":
                 value = splitted_header[1]
     response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(value)}\r\n\r\n{value}".encode()
     return response
