@@ -1,5 +1,4 @@
 import socket  # noqa: F401
-import requests
 
 
 def echo_endpoint(path: str):
@@ -9,7 +8,6 @@ def echo_endpoint(path: str):
     
 
 def main():
-
     server_socket = socket.create_server(("localhost", 4221), reuse_port=False)
     conn, _addrs = server_socket.accept() 
     if conn:
