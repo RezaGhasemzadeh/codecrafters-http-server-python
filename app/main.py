@@ -10,7 +10,7 @@ def main():
         request_line = data.decode().split("\r\n")[0]
         path = request_line.split(" ")[1]
         if path == "/":
-            conn.sendall(b"HTTP/1.1 200 OK\r\n\r\b")
+            conn.sendall(b"HTTP/1.1 200 OK\r\n\r\n")
         else:
             conn.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
 
