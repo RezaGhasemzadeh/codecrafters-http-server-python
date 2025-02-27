@@ -16,7 +16,7 @@ def create_response(status_code=200, body="", headers=None, include_content_enco
     response_body = ""
     if include_content_encoding:
         headers["Content-Encoding"] = " gzip"
-        compressed_body = str(gzip.compress(body.encode()))
+        compressed_body = gzip.compress(body.encode())
 
     if body:
         if include_content_encoding:
@@ -31,7 +31,7 @@ def create_response(status_code=200, body="", headers=None, include_content_enco
         for header_key, header_value in headers.items():
             response_headers += header_key + ":" + header_value + CRLF
 
-    final_response = CRLF.join([response_line, response_headers, response_body]).encode()
+    final_response = CRLF.join([response_line, response_headers]).encode() + CRLF.encode() + response_body
 
     return final_response
 
