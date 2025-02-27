@@ -4,18 +4,17 @@ import threading
 
 CRLF = "\r\n"
 METHODS = ["GET", "POST", "PUT", "DELETE", "UPDATE"]
-STATUS_CODES = {404: "Not Found", 200: "OK"}
 
 
 def echo_endpoint(path: str):
     response_body = path.split("/")[-1]
-    response = create_response(200, response_body)
+    response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-length: {len(response_body)}\r\n\r\n{response_body}".encode()
     return response
 
 
 def user_agent_endpoint(headers):
     response_body = headers["User-Agent"][0]
-    response = create_response(200, response_body)
+    response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(response_body)}\r\n\r\n{response_body}".encode()
     return response
     
     
@@ -41,13 +40,15 @@ def parse_request(request):
             request_info["headers"][header_key] = [header_value]
 
     return request_info
-    
-    
-def create_response(status_code=200, body=None):
-    if body:
-        response = f"HTTP/1.1 {status_code} {STATUS_CODES[status_code]}\r\nContent-Type: text/plain\r\nContent-Length: {len(body)}\r\n\r\n{body}".encode()
-    else:
-        response = f"HTTP/1.1 {status_code} {STATUS_CODES[status_code]}\r\n\r\n".encode()
+
+
+def files_endpoint(path):
+    file_name = path.split("/")[-1]
+    file_content = ""
+    with open(file_name, "r") as file:
+        file_content = file.read()
+
+    response = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {len(file_content)}\r\n\r\n{file_content}".encode()
     return response
 
 
@@ -58,7 +59,7 @@ def handle_request(conn):
         return None
 
     elif request_info["path"] == "/":
-        response = create_response(200, body=None)
+        response = "HTTP/1.1 200 OK\r\n\r\n".encode()
 
     elif request_info["path"].startswith("/echo"):
         response = echo_endpoint(request_info["path"])
@@ -66,8 +67,11 @@ def handle_request(conn):
     elif request_info["path"].startswith("/user-agent"):
         response = user_agent_endpoint(request_info["headers"])
 
+    elif request_info["path"].startswith("/files"):
+        response = files_endpoint(request_info["path"])
+
     else:
-        response = create_response(404, body=None)
+        response = "HTTP/1.1 404 Not Found\r\n\r\n".encode()
 
     conn.sendall(response)
     conn.close()
