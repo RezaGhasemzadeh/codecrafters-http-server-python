@@ -89,7 +89,7 @@ def Get_method_files_endpoint(path):
             file_content = file.read()
 
         #response = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {len(file_content)}\r\n\r\n{file_content}".encode()
-        response = create_response(status_code=200, headers={"Content-Type": " application/octec-stream", "Content-Length": None}, body=file_content, include_content_encoding=False)
+        response = create_response(status_code=200, headers={"Content-Type": " application/octet-stream", "Content-Length": None}, body=file_content, include_content_encoding=False)
 
     except Exception:
         response = create_response(status_code=404, body=None, headers=None, include_content_encoding=None)
