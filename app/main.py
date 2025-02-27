@@ -5,17 +5,50 @@ import sys
 
 CRLF = "\r\n"
 METHODS = ["GET", "POST", "PUT", "DELETE", "UPDATE"]
+COMPRESSION_SCHEMES_SUPPORTED = ("gzip", )
+STATUS_CODES = {200: "OK", 201: "Created", 404: "Not Found", 400: "Bad Request"}
 
 
-def echo_endpoint(path: str):
+def create_response(status_code=200, body=None, headers=None, include_content_encoding=False):
+    response_line = f"HTTP/1.1 {status_code} {STATUS_CODES[status_code]}"
+    response_headers = ""
+    response_body = ""
+    if include_content_encoding:
+        headers["Content-Encoding"] = " gzip"
+
+    if body:
+        response_body = body
+
+    if headers:
+        if "Content-Length" in headers.keys():
+            headers["Content-Length"] = str(len(body))
+
+        for header_key, header_value in headers.items():
+            response_headers += header_key + ":" + header_value + CRLF
+
+    final_response = CRLF.join([response_line, response_headers, response_body]).encode()
+
+    return final_response
+
+
+
+
+def echo_endpoint(path: str, headers):
+    content_encoding_header = False
+
+    print(headers)
+    if "Accept-Encoding" in headers.keys() and headers["Accept-Encoding"][0] in COMPRESSION_SCHEMES_SUPPORTED:
+        content_encoding_header = True
+    print(content_encoding_header)
+
     response_body = path.split("/")[-1]
-    response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-length: {len(response_body)}\r\n\r\n{response_body}".encode()
+    response = create_response(status_code=200, headers={"Content-Type": " text/plain", "Content-Length": None}, body=response_body, include_content_encoding=content_encoding_header)
     return response
 
 
 def user_agent_endpoint(headers):
     response_body = headers["User-Agent"][0]
-    response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(response_body)}\r\n\r\n{response_body}".encode()
+    response = create_response(status_code=200, headers={"Content-Type": " text/plain", "Content-Length": None}, body=response_body, include_content_encoding=False)
     return response
     
     
@@ -55,10 +88,11 @@ def Get_method_files_endpoint(path):
         with open(file_name, "r") as file:
             file_content = file.read()
 
-        response = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {len(file_content)}\r\n\r\n{file_content}".encode()
+        #response = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {len(file_content)}\r\n\r\n{file_content}".encode()
+        response = create_response(status_code=200, headers={"Content-Type": " application/octec-stream", "Content-Length": None}, body=file_content, include_content_encoding=False)
 
     except Exception:
-        response = f"HTTP/1.1 404 Not Found\r\n\r\n".encode()
+        response = create_response(status_code=404, body=None, headers=None, include_content_encoding=None)
     return response
 
 
@@ -69,9 +103,9 @@ def Post_method_file_endpoint(request_body, path):
     try:
         with open(file_name, "w") as file:
             file.write(request_body)
-        response = "HTTP/1.1 201 Created\r\n\r\n".encode()
+        response = create_response(status_code=201, body=None, headers=None, include_content_encoding=None)
     except Exception:
-        response = "HTTP/1.1 400 Bad Request\r\n\r\n".encode()
+        response = create_response(status_code=400, body=None, headers=None, include_content_encoding=None)
     return response
 
 
@@ -82,10 +116,10 @@ def handle_request(conn):
         return None
 
     elif request_info["path"] == "/":
-        response = "HTTP/1.1 200 OK\r\n\r\n".encode()
+        response = create_response(status_code=200, body=None, headers=None, include_content_encoding=None)
 
     elif request_info["path"].startswith("/echo"):
-        response = echo_endpoint(request_info["path"])
+        response = echo_endpoint(request_info["path"], request_info["headers"])
 
     elif request_info["path"].startswith("/user-agent"):
         response = user_agent_endpoint(request_info["headers"])
@@ -97,7 +131,7 @@ def handle_request(conn):
         response = Post_method_file_endpoint(request_info["body"], request_info["path"])
 
     else:
-        response = "HTTP/1.1 404 Not Found\r\n\r\n".encode()
+        response = create_response(status_code=404, body=None, headers=None, include_content_encoding=None)
 
     conn.sendall(response)
     conn.close()
