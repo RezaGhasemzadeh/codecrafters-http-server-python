@@ -36,11 +36,12 @@ def create_response(status_code=200, body=None, headers=None, include_content_en
 def echo_endpoint(path: str, headers):
     content_encoding_header = False
 
-    print(headers)
-    if "Accept-Encoding" in headers.keys() and headers["Accept-Encoding"][0] in COMPRESSION_SCHEMES_SUPPORTED:
-        content_encoding_header = True
-    print(content_encoding_header)
-
+    if "Accept-Encoding" in headers.keys():
+        encoding_schemes = headers["Accept-Encoding"][0].split(",")
+        for es in encoding_schemes:
+            if es.strip() in COMPRESSION_SCHEMES_SUPPORTED:
+                content_encoding_header = True
+                break
     response_body = path.split("/")[-1]
     response = create_response(status_code=200, headers={"Content-Type": " text/plain", "Content-Length": None}, body=response_body, include_content_encoding=content_encoding_header)
     return response
@@ -88,7 +89,6 @@ def Get_method_files_endpoint(path):
         with open(file_name, "r") as file:
             file_content = file.read()
 
-        #response = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {len(file_content)}\r\n\r\n{file_content}".encode()
         response = create_response(status_code=200, headers={"Content-Type": " application/octet-stream", "Content-Length": None}, body=file_content, include_content_encoding=False)
 
     except Exception:
