@@ -1,4 +1,5 @@
 import socket
+import threading 
 
 
 CRLF = "\r\n"
@@ -51,28 +52,34 @@ def create_response(status_code=200, body=None):
     return response
 
 
+def handle_request(conn):
+    data = conn.recv(4096).decode()
+    request_info = parse_request(data)
+    if not request_info:
+        return None
+
+    elif request_info["path"] == "/":
+        response = b"HTTP/1.1 200 OK\r\n\r\n"
+
+    elif request_info["path"].startswith("/echo"):
+        response = echo_endpoint(request_info["path"])
+
+    elif request_info["path"].startswith("/user-agent"):
+        response = user_agent_endpoint(request_info["headers"])
+
+    else:
+        response = create_response(404, body=None)
+
+    conn.sendall(response)
+
+
 def main():
     server_socket = socket.create_server(("localhost", 4221), reuse_port=False)
     while True:
         conn, _addrs = server_socket.accept()
-        data = conn.recv(4096).decode()
-        request_info = parse_request(data)
-        if not request_info:
-            break
-
-        elif request_info["path"] == "/":
-            response = b"HTTP/1.1 200 OK\r\n\r\n"
-
-        elif request_info["path"].startswith("/echo"):
-            response = echo_endpoint(request_info["path"])
-
-        elif request_info["path"].startswith("/user-agent"):
-            response = user_agent_endpoint(request_info["headers"])
-
-        else:
-            response = create_response(404, body=None)
-
-        conn.sendall(response)
+        threading.Thread(target=handle_request, args=(conn,)).start()
+        handle_request(conn)
+        
 
 
 if __name__ == "__main__":
