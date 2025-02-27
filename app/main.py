@@ -13,7 +13,7 @@ STATUS_CODES = {200: "OK", 201: "Created", 404: "Not Found", 400: "Bad Request"}
 def create_response(status_code=200, body="", headers=None, include_content_encoding=False):
     response_line = f"HTTP/1.1 {status_code} {STATUS_CODES[status_code]}"
     response_headers = ""
-    response_body = ""
+    response_body = "".encode()
     if include_content_encoding:
         headers["Content-Encoding"] = " gzip"
         compressed_body = gzip.compress(body.encode())
