@@ -44,11 +44,10 @@ def parse_request(request):
     
     
 def create_response(status_code=200, body=None):
-    response_line = f"HTTP/1.1 {status_code} {STATUS_CODES[status_code]}"
-    headers = ""
     if body:
-        headers = f"Content-Type: text/plain\r\nContent-Length: {len(body)}\r\n\r\n{body}"
-    response = CRLF.join([response_line, headers]).encode()
+        response = f"HTTP/1.1 {status_code} {STATUS_CODES[status_code]}\r\nContent-Type: text/plain\r\nContent-Length: {len(body)}\r\n\r\n{body}".encode()
+    else:
+        response = f"HTTP/1.1 {status_code} {STATUS_CODES[status_code]}\r\n\r\n".encode()
     return response
 
 
@@ -59,7 +58,7 @@ def handle_request(conn):
         return None
 
     elif request_info["path"] == "/":
-        response = b"HTTP/1.1 200 OK\r\n\r\n"
+        response = create_response(200, body=None)
 
     elif request_info["path"].startswith("/echo"):
         response = echo_endpoint(request_info["path"])
