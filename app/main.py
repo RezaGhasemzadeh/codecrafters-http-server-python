@@ -22,7 +22,7 @@ def create_response(status_code=200, body="", headers=None, include_content_enco
         if include_content_encoding:
             response_body = compressed_body
         else:
-            response_body = body
+            response_body = body.encode()
 
     if headers:
         if "Content-Length" in headers.keys():
