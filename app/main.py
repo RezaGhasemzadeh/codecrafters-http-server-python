@@ -45,8 +45,9 @@ def parse_request(request):
 
 def files_endpoint(path):
     direc = sys.argv[2]
-    file_name = f"/{direc}/" + path.split("/")[-1]
+    file_name = f"{direc}/" + path.split("/")[-1]
     file_content = ""
+    print(direc, file_name)
     with open(file_name, "r") as file:
         file_content = file.read()
 
