@@ -1,5 +1,6 @@
 import socket
 import threading 
+import sys
 
 
 CRLF = "\r\n"
@@ -43,7 +44,8 @@ def parse_request(request):
 
 
 def files_endpoint(path):
-    file_name = path.split("/")[-1]
+    direc = sys.argv[2]
+    file_name = f"/{direc}/" + path.split("/")[-1]
     file_content = ""
     with open(file_name, "r") as file:
         file_content = file.read()
