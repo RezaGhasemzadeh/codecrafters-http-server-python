@@ -70,6 +70,7 @@ def handle_request(conn):
         response = create_response(404, body=None)
 
     conn.sendall(response)
+    conn.close()
 
 
 def main():
@@ -77,7 +78,6 @@ def main():
     while True:
         conn, _addrs = server_socket.accept()
         threading.Thread(target=handle_request, args=(conn,)).start()
-        handle_request(conn)
         
 
 
