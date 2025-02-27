@@ -48,10 +48,14 @@ def files_endpoint(path):
     file_name = f"{direc}/" + path.split("/")[-1]
     file_content = ""
     print(direc, file_name)
-    with open(file_name, "r") as file:
-        file_content = file.read()
+    try:
+        with open(file_name, "r") as file:
+            file_content = file.read()
 
-    response = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {len(file_content)}\r\n\r\n{file_content}".encode()
+        response = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {len(file_content)}\r\n\r\n{file_content}".encode()
+
+    except Exception:
+        response = f"HTTP/1.1 404 Not Found\r\n\r\n".encode()
     return response
 
 
