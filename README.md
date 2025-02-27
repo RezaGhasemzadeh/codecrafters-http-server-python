@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# codecrafters-http-server-python
-This is my solution to codecrafter's challenge "Build your own http server with python"
-=======
 [![progress-banner](https://backend.codecrafters.io/progress/http-server/cabf7f8d-d3eb-49af-96c6-82bc7e10779a)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
 
 This is a starting point for Python solutions to the
@@ -40,3 +36,6 @@ Note: This section is for stages 2 and beyond.
 1. Commit your changes and run `git push origin master` to submit your solution
    to CodeCrafters. Test output will be streamed to your terminal.
 >>>>>>> master
+=======
+
+>>>>>>> b77f9ce600378ce5ca34a28511d2fbdd0e786ad1
