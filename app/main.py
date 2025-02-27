@@ -1,6 +1,7 @@
 import socket
 import threading 
 import sys
+import gzip
 
 
 CRLF = "\r\n"
@@ -9,19 +10,23 @@ COMPRESSION_SCHEMES_SUPPORTED = ("gzip", )
 STATUS_CODES = {200: "OK", 201: "Created", 404: "Not Found", 400: "Bad Request"}
 
 
-def create_response(status_code=200, body=None, headers=None, include_content_encoding=False):
+def create_response(status_code=200, body="", headers=None, include_content_encoding=False):
     response_line = f"HTTP/1.1 {status_code} {STATUS_CODES[status_code]}"
     response_headers = ""
     response_body = ""
     if include_content_encoding:
         headers["Content-Encoding"] = " gzip"
+        compressed_body = str(gzip.compress(body.encode()))
 
     if body:
-        response_body = body
+        if include_content_encoding:
+            response_body = compressed_body
+        else:
+            response_body = body
 
     if headers:
         if "Content-Length" in headers.keys():
-            headers["Content-Length"] = str(len(body))
+            headers["Content-Length"] = str(len(response_body))
 
         for header_key, header_value in headers.items():
             response_headers += header_key + ":" + header_value + CRLF
@@ -92,7 +97,7 @@ def Get_method_files_endpoint(path):
         response = create_response(status_code=200, headers={"Content-Type": " application/octet-stream", "Content-Length": None}, body=file_content, include_content_encoding=False)
 
     except Exception:
-        response = create_response(status_code=404, body=None, headers=None, include_content_encoding=None)
+        response = create_response(status_code=404, body="", headers=None, include_content_encoding=None)
     return response
 
 
@@ -103,9 +108,9 @@ def Post_method_file_endpoint(request_body, path):
     try:
         with open(file_name, "w") as file:
             file.write(request_body)
-        response = create_response(status_code=201, body=None, headers=None, include_content_encoding=None)
+        response = create_response(status_code=201, body="", headers=None, include_content_encoding=None)
     except Exception:
-        response = create_response(status_code=400, body=None, headers=None, include_content_encoding=None)
+        response = create_response(status_code=400, body="", headers=None, include_content_encoding=None)
     return response
 
 
@@ -116,7 +121,7 @@ def handle_request(conn):
         return None
 
     elif request_info["path"] == "/":
-        response = create_response(status_code=200, body=None, headers=None, include_content_encoding=None)
+        response = create_response(status_code=200, body="", headers=None, include_content_encoding=None)
 
     elif request_info["path"].startswith("/echo"):
         response = echo_endpoint(request_info["path"], request_info["headers"])
@@ -131,7 +136,7 @@ def handle_request(conn):
         response = Post_method_file_endpoint(request_info["body"], request_info["path"])
 
     else:
-        response = create_response(status_code=404, body=None, headers=None, include_content_encoding=None)
+        response = create_response(status_code=404, body="", headers=None, include_content_encoding=None)
 
     conn.sendall(response)
     conn.close()
